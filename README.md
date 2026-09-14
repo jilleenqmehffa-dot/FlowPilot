@@ -63,3 +63,8 @@ npm run lint
 
 在项目根目录运行 `docker compose stop` 可停止基础设施并保留数据。
 Git 已配置 GitHub origin，账户认证沿用本机配置。
+
+## CRM V1 数据层
+
+已定义 User、Company、Contact、Opportunity、Activity、Task 六个模型。
+数据库关系、字段约定、建表命令与测试步骤见 [CRM V1 数据结构](docs/crm-v1.md)。
