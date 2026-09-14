@@ -14,13 +14,12 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.database import Base
-from backend.models.mixins import RecordMixin
+from backend.app.db.base import Base, RecordMixin
 
 if TYPE_CHECKING:
-    from backend.models.company import Company
-    from backend.models.opportunity import Opportunity
-    from backend.models.user import User
+    from backend.app.models.company import Company
+    from backend.app.models.opportunity import Opportunity
+    from backend.app.models.user import User
 
 
 class Activity(RecordMixin, Base):

@@ -5,11 +5,10 @@ from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.database import Base
-from backend.models.mixins import RecordMixin
+from backend.app.db.base import Base, RecordMixin
 
 if TYPE_CHECKING:
-    from backend.models.company import Company
+    from backend.app.models.company import Company
 
 
 class Contact(RecordMixin, Base):

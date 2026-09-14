@@ -1,7 +1,8 @@
 """Create the V1 schema explicitly; this is not a schema migration tool."""
 
-from backend import models  # noqa: F401 -- register every table on Base.metadata
-from backend.database import Base, get_engine
+from backend.app import models  # noqa: F401 -- register every table on Base.metadata
+from backend.app.db.base import Base
+from backend.app.db.database import get_engine
 
 
 def main() -> None:

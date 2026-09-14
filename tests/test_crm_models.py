@@ -9,9 +9,9 @@ from sqlalchemy import create_engine, create_mock_engine, inspect, select, text
 from sqlalchemy.exc import DBAPIError, IntegrityError, SAWarning
 from sqlalchemy.orm import Session, configure_mappers
 
-from backend.database import Base
-from backend.enums import OpportunityStage, TaskStatus
-from backend.models import Activity, Company, Contact, Opportunity, Task, User
+from backend.app.db.base import Base
+from backend.app.models import Activity, Company, Contact, Opportunity, Task, User
+from backend.app.models.enums import OpportunityStage, TaskStatus
 
 
 class ModelMappingTests(unittest.TestCase):

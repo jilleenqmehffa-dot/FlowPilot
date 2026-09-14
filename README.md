@@ -36,12 +36,12 @@ docker compose ps
 
 ```bash
 # 项目根目录：FastAPI，http://localhost:8000/docs
-uv run --env-file .env uvicorn backend.main:app --reload
+uv run --env-file .env uvicorn backend.app.main:app --reload
 ```
 
 ```bash
 # 项目根目录：Celery，需要 Redis 已启动
-uv run --env-file .env celery -A backend.worker:app worker --loglevel=info
+uv run --env-file .env celery -A backend.app.worker:app worker --loglevel=info
 ```
 
 ```bash

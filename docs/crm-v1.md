@@ -1,6 +1,6 @@
 # CRM V1 数据结构
 
-每个实体模型位于 `backend/models/` 下的同名文件，统一入口为 `backend.models`；公共主键和时间字段位于 `backend.models.mixins`，数据库基类、延迟创建的连接池及 FastAPI 会话依赖位于 `backend.database`。
+每个实体模型位于 `backend/app/models/` 下的同名文件，统一入口为 `backend.app.models`；数据库基类和公共 ORM 字段位于 `backend.app.db.base`，延迟创建的连接池及 FastAPI 会话依赖位于 `backend.app.db.database`。
 导入模块不会连接数据库，FastAPI 启动时也不会自动建表。
 当前项目尚未配置 Alembic，本次不新增迁移框架。
 
@@ -44,7 +44,7 @@ User → Company、Opportunity、Activity、Task；Company → Contact、Opportu
 
 ```bash
 docker compose up -d --wait postgres
-uv run --env-file .env python -m backend.init_db
+uv run --env-file .env python -m backend.app.db.init_db
 ```
 
 命令使用事务创建六张表、枚举、索引及约束，可重复执行。

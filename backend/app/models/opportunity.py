@@ -16,15 +16,14 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.database import Base
-from backend.enums import OpportunityStage
-from backend.models.mixins import RecordMixin
+from backend.app.db.base import Base, RecordMixin
+from backend.app.models.enums import OpportunityStage
 
 if TYPE_CHECKING:
-    from backend.models.activity import Activity
-    from backend.models.company import Company
-    from backend.models.task import Task
-    from backend.models.user import User
+    from backend.app.models.activity import Activity
+    from backend.app.models.company import Company
+    from backend.app.models.task import Task
+    from backend.app.models.user import User
 
 
 class Opportunity(RecordMixin, Base):
