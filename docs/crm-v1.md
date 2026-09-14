@@ -1,6 +1,6 @@
 # CRM V1 数据结构
 
-模型入口：`backend.models`；数据库基类、延迟创建的连接池及 FastAPI 会话依赖：`backend.database`。
+每个实体模型位于 `backend/models/` 下的同名文件，统一入口为 `backend.models`；公共主键和时间字段位于 `backend.models.mixins`，数据库基类、延迟创建的连接池及 FastAPI 会话依赖位于 `backend.database`。
 导入模块不会连接数据库，FastAPI 启动时也不会自动建表。
 当前项目尚未配置 Alembic，本次不新增迁移框架。
 
