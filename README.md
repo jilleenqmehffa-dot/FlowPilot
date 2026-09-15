@@ -65,6 +65,23 @@ npm run lint
 在项目根目录运行 `docker compose stop` 可停止基础设施并保留数据。
 Git 已配置 GitHub origin，账户认证沿用本机配置。
 
+## 数据库迁移
+
+数据库结构由 Alembic 管理，首次初始化或更新到最新版本执行：
+
+```bash
+uv run --env-file .env alembic upgrade head
+```
+
+修改 ORM 模型后生成迁移：
+
+```bash
+uv run --env-file .env alembic revision --autogenerate -m "变更说明"
+```
+
+迁移配置位于 `alembic.ini`，脚本位于 `migrations/`。提交自动生成的迁移前需要检查 upgrade 和 downgrade 内容。
+如果数据库此前已通过 `backend.app.db.init_db` 创建，并确认结构与当前 CRM V1 完全一致，应先备份并执行 `alembic stamp 20260915_0001` 交由 Alembic 接管；`stamp` 只记录版本，不执行建表。
+
 ## CRM V1 数据层
 
 已定义 User、Company、Contact、Opportunity、Activity、Task 六个模型。

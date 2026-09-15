@@ -4,7 +4,7 @@
 对应的 Pydantic `Base`、`Create`、`Update`、`Read` Schema 位于 `backend/app/schemas/`，并统一从 `backend.app.schemas` 导入；读取 Schema 支持直接校验 ORM 对象，关联字段使用外键 ID 表达。
 基础数据访问封装位于 `backend/app/repositories/`，六个模型各自拥有类型明确的 Repository，并统一从 `backend.app.repositories` 导入。Repository 提供查询、分页、创建、部分更新和删除，只执行 `flush` 而不提交事务。
 导入模块不会连接数据库，FastAPI 启动时也不会自动建表。
-当前项目尚未配置 Alembic，本次不新增迁移框架。
+数据库结构由 Alembic 管理，迁移环境会自动加载全部 ORM 模型，并使用 `Base.metadata` 进行差异比较。
 
 ## 表与关系
 
@@ -46,12 +46,11 @@ User → Company、Opportunity、Activity、Task；Company → Contact、Opportu
 
 ```bash
 docker compose up -d --wait postgres
-uv run --env-file .env python -m backend.app.db.init_db
+uv run --env-file .env alembic upgrade head
 ```
 
-命令使用事务创建六张表、枚举、索引及约束，可重复执行。
-`create_all` 仅创建缺失表，不修改已存在表的列或约束，不是迁移工具。
-以后调整已部署数据库结构时，应另行引入 Alembic migration。
+命令按版本创建或更新六张表、枚举、索引及约束，可重复执行。调整模型后使用 `alembic revision --autogenerate -m "变更说明"` 生成新版本，并在提交前检查 upgrade 和 downgrade 内容。
+此前通过 `backend.app.db.init_db` 创建的数据库若已确认结构与 CRM V1 完全一致，应先备份，再执行 `alembic stamp 20260915_0001` 记录基线版本；该命令不会修改已有表结构。
 
 后续 FastAPI 同步端点可通过 `Depends(get_session)` 获取 Session；写操作显式 `session.commit()`，离开依赖时关闭会话并回滚未提交事务。
 
