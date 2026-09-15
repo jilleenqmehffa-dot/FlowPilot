@@ -1,6 +1,7 @@
 # CRM V1 数据结构
 
 每个实体模型位于 `backend/app/models/` 下的同名文件，统一入口为 `backend.app.models`；数据库基类和公共 ORM 字段位于 `backend.app.db.base`，延迟创建的连接池及 FastAPI 会话依赖位于 `backend.app.db.database`。
+对应的 Pydantic `Base`、`Create`、`Update`、`Read` Schema 位于 `backend/app/schemas/`，并统一从 `backend.app.schemas` 导入；读取 Schema 支持直接校验 ORM 对象，关联字段使用外键 ID 表达。
 导入模块不会连接数据库，FastAPI 启动时也不会自动建表。
 当前项目尚未配置 Alembic，本次不新增迁移框架。
 
