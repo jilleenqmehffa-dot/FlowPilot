@@ -2,6 +2,7 @@
 
 from backend.app.core.exceptions import (
     CRMServiceError,
+    InvalidActivityError,
     InvalidOpportunityTransitionError,
     OpportunityOwnerConflictError,
     ResourceNotFoundError,
@@ -9,6 +10,7 @@ from backend.app.core.exceptions import (
 
 __all__ = [
     "CRMServiceError",
+    "InvalidActivityError",
     "InvalidOpportunityTransitionError",
     "OpportunityOwnerConflictError",
     "ResourceNotFoundError",

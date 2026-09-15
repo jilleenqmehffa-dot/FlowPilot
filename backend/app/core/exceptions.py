@@ -18,3 +18,7 @@ class InvalidOpportunityTransitionError(CRMServiceError, ValueError):
 
 class OpportunityOwnerConflictError(CRMServiceError, ValueError):
     """An owner reassignment did not identify a different owner."""
+
+
+class InvalidActivityError(CRMServiceError, ValueError):
+    """Activity data violates a business rule not expressible by one field."""

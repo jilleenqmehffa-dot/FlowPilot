@@ -110,6 +110,54 @@ class RepositoryTests(unittest.TestCase):
         self.assertIn("WHERE opportunities.id =", str(statement))
         self.assertIn("FOR UPDATE", str(statement))
 
+    def test_activity_mutation_lookup_locks_the_row(self):
+        repository = ActivityRepository(self.session)
+        activity = Activity(
+            id=1,
+            summary="Call",
+            performed_by_id=2,
+        )
+        self.session.scalar.return_value = activity
+
+        self.assertIs(repository.get_for_update(1), activity)
+
+        statement = self.session.scalar.call_args.args[0]
+        self.assertIn("WHERE activities.id =", str(statement))
+        self.assertIn("FOR UPDATE", str(statement))
+
+    def test_activity_detail_preloads_all_model_relationships(self):
+        repository = ActivityRepository(self.session)
+        activity = Activity(id=1, summary="Call", performed_by_id=2)
+        self.session.scalar.return_value = activity
+
+        self.assertIs(repository.get_detail(1), activity)
+
+        statement = self.session.scalar.call_args.args[0]
+        self.assertEqual(len(statement._with_options), 3)
+
+    def test_activity_list_applies_real_filters_sorting_and_pagination(self):
+        repository = ActivityRepository(self.session)
+        self.session.scalars.return_value.all.return_value = []
+
+        result = repository.list_filtered(
+            company_id=10,
+            opportunity_id=30,
+            performed_by_id=20,
+            offset=5,
+            limit=25,
+        )
+
+        self.assertEqual(result, [])
+        statement = self.session.scalars.call_args.args[0]
+        sql = str(statement)
+        self.assertIn("activities.company_id =", sql)
+        self.assertIn("activities.opportunity_id =", sql)
+        self.assertIn("activities.performed_by_id =", sql)
+        self.assertIn("ORDER BY activities.occurred_at DESC, activities.id DESC", sql)
+        parameters = statement.compile().params
+        self.assertEqual(parameters["param_1"], 25)
+        self.assertEqual(parameters["param_2"], 5)
+
     def test_pipeline_query_excludes_terminal_stages_and_applies_filters(self):
         repository = OpportunityRepository(self.session)
         self.session.scalars.return_value.all.return_value = []
