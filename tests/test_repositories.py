@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 from sqlalchemy.orm import Session
 
 from backend.app.models import Activity, Company, Contact, Opportunity, Task, User
+from backend.app.models.enums import OpportunityStage
 from backend.app.repositories import (
     ActivityRepository,
     CompanyRepository,
@@ -91,6 +92,45 @@ class RepositoryTests(unittest.TestCase):
         self.session.delete.assert_called_once_with(user)
         self.session.flush.assert_called_once_with()
         self.session.commit.assert_not_called()
+
+    def test_opportunity_mutation_lookup_locks_the_row(self):
+        repository = OpportunityRepository(self.session)
+        opportunity = Opportunity(
+            id=1,
+            name="Deal",
+            company_id=2,
+            owner_id=3,
+            stage=OpportunityStage.NEW,
+        )
+        self.session.scalar.return_value = opportunity
+
+        self.assertIs(repository.get_for_update(1), opportunity)
+
+        statement = self.session.scalar.call_args.args[0]
+        self.assertIn("WHERE opportunities.id =", str(statement))
+        self.assertIn("FOR UPDATE", str(statement))
+
+    def test_pipeline_query_excludes_terminal_stages_and_applies_filters(self):
+        repository = OpportunityRepository(self.session)
+        self.session.scalars.return_value.all.return_value = []
+
+        self.assertEqual(
+            repository.list_pipeline(owner_id=3, company_id=2, limit=25),
+            [],
+        )
+
+        statement = self.session.scalars.call_args.args[0]
+        sql = str(statement)
+        self.assertIn("opportunities.stage NOT IN", sql)
+        self.assertIn("opportunities.owner_id =", sql)
+        self.assertIn("opportunities.company_id =", sql)
+        self.assertIn("ORDER BY opportunities.stage", sql)
+        parameters = statement.compile().params
+        self.assertEqual(
+            parameters["stage_1"],
+            [OpportunityStage.WON, OpportunityStage.LOST],
+        )
+        self.assertEqual(parameters["param_1"], 25)
 
 
 if __name__ == "__main__":
