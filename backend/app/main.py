@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 
-app = FastAPI(title="FlowPilot")
+from backend.app.core.config import get_settings
+
+app = FastAPI(title=get_settings().app_name)
 
 
 @app.get("/health")

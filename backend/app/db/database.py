@@ -1,4 +1,3 @@
-import os
 from collections.abc import Iterator
 from functools import lru_cache
 
@@ -6,11 +5,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine, make_url
 from sqlalchemy.orm import Session
 
+from backend.app.core.config import get_settings
+
 
 @lru_cache
 def get_engine() -> Engine:
     """Create the engine lazily; importing models requires no database or secrets."""
-    database_url = os.getenv("DATABASE_URL")
+    database_url = get_settings().database_url
     if not database_url:
         raise RuntimeError("Set DATABASE_URL before accessing the database")
     url = make_url(database_url)

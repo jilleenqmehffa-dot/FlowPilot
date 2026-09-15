@@ -1,11 +1,13 @@
-import os
-
 from celery import Celery
+
+from backend.app.core.config import get_settings
+
+settings = get_settings()
 
 app = Celery(
     "flowpilot",
-    broker=os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0"),
-    backend=os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/1"),
+    broker=settings.celery_broker_url,
+    backend=settings.celery_result_backend,
 )
 
 
