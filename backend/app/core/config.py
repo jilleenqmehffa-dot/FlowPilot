@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,13 +17,22 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "FlowPilot"
+    log_level: str = "INFO"
     database_url: str | None = None
     celery_broker_url: str = "redis://localhost:6379/0"
     celery_result_backend: str = "redis://localhost:6379/1"
 
+    @field_validator("log_level", mode="before")
+    @classmethod
+    def validate_log_level(cls, value: object) -> str:
+        level = str(value).upper()
+        if level not in {"CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"}:
+            raise ValueError("LOG_LEVEL must be CRITICAL, ERROR, WARNING, INFO, or DEBUG")
+        return level
+
 
 @lru_cache
 def get_settings() -> Settings:
-    """Return one immutable-by-convention settings instance per process."""
+    """Return one immutable settings instance per process."""
 
     return Settings()

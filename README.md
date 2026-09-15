@@ -51,7 +51,7 @@ npm run dev
 ```
 
 `GET /health` 是后端启动检查接口。LangGraph、LangChain 已列入依赖，使用模型时再配置对应提供商和 API key。
-后端配置统一定义在 `backend/app/core/config.py`，从环境变量或项目根目录 `.env` 加载，并由 API、数据库和 Celery 共用。
+后端配置统一定义在 `backend/app/core/config.py`，从环境变量或项目根目录 `.env` 加载，并由 API、数据库和 Celery 共用。日志配置位于 `backend/app/core/log.py`，通过 `LOG_LEVEL` 控制级别，默认输出到控制台。
 
 ## 验证与停止
 
