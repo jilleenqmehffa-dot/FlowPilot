@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from sqlalchemy.orm import Session
 
 from backend.app.models import Activity, Company, Contact, Opportunity, Task, User
-from backend.app.models.enums import OpportunityStage
+from backend.app.models.enums import OpportunityStage, TaskStatus
 from backend.app.repositories import (
     ActivityRepository,
     CompanyRepository,
@@ -179,6 +179,52 @@ class RepositoryTests(unittest.TestCase):
             [OpportunityStage.WON, OpportunityStage.LOST],
         )
         self.assertEqual(parameters["param_1"], 25)
+
+    def test_task_mutation_lookup_locks_the_row(self):
+        repository = TaskRepository(self.session)
+        task = Task(id=1, title="Follow up", assignee_id=2)
+        self.session.scalar.return_value = task
+
+        self.assertIs(repository.get_for_update(1), task)
+
+        statement = self.session.scalar.call_args.args[0]
+        self.assertIn("WHERE tasks.id =", str(statement))
+        self.assertIn("FOR UPDATE", str(statement))
+
+    def test_task_detail_preloads_all_model_relationships(self):
+        repository = TaskRepository(self.session)
+        task = Task(id=1, title="Follow up", assignee_id=2)
+        self.session.scalar.return_value = task
+
+        self.assertIs(repository.get_detail(1), task)
+
+        statement = self.session.scalar.call_args.args[0]
+        self.assertEqual(len(statement._with_options), 3)
+
+    def test_task_list_applies_filters_sorting_and_pagination(self):
+        repository = TaskRepository(self.session)
+        self.session.scalars.return_value.all.return_value = []
+
+        result = repository.list_filtered(
+            assignee_id=20,
+            company_id=10,
+            opportunity_id=30,
+            status=TaskStatus.IN_PROGRESS,
+            offset=5,
+            limit=25,
+        )
+
+        self.assertEqual(result, [])
+        statement = self.session.scalars.call_args.args[0]
+        sql = str(statement)
+        self.assertIn("tasks.assignee_id =", sql)
+        self.assertIn("tasks.company_id =", sql)
+        self.assertIn("tasks.opportunity_id =", sql)
+        self.assertIn("tasks.status =", sql)
+        self.assertIn("ORDER BY tasks.due_at, tasks.id", sql)
+        parameters = statement.compile().params
+        self.assertEqual(parameters["param_1"], 25)
+        self.assertEqual(parameters["param_2"], 5)
 
 
 if __name__ == "__main__":
