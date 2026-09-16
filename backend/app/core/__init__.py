@@ -3,6 +3,7 @@
 from backend.app.core.exceptions import (
     CRMServiceError,
     InvalidActivityError,
+    InvalidCustomerError,
     InvalidOpportunityTransitionError,
     InvalidTaskError,
     InvalidTaskTransitionError,
@@ -13,6 +14,7 @@ from backend.app.core.exceptions import (
 __all__ = [
     "CRMServiceError",
     "InvalidActivityError",
+    "InvalidCustomerError",
     "InvalidOpportunityTransitionError",
     "InvalidTaskError",
     "InvalidTaskTransitionError",

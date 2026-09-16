@@ -30,3 +30,7 @@ class InvalidTaskError(CRMServiceError, ValueError):
 
 class InvalidTaskTransitionError(CRMServiceError, ValueError):
     """The requested task status transition is not allowed."""
+
+
+class InvalidCustomerError(CRMServiceError, ValueError):
+    """Customer or contact data violates a cross-field business rule."""
