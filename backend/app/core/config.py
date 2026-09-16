@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 
-from pydantic import field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     database_url: str | None = None
     celery_broker_url: str = "redis://localhost:6379/0"
     celery_result_backend: str = "redis://localhost:6379/1"
+    deepseek_api_key: SecretStr | None = None
+    deepseek_model: str = "deepseek-chat"
+    deepseek_base_url: str = "https://api.deepseek.com"
+    deepseek_temperature: float = Field(default=0.0, ge=0.0, le=2.0)
 
     @field_validator("log_level", mode="before")
     @classmethod

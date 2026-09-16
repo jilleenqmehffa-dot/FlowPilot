@@ -21,6 +21,10 @@ class SettingsTests(unittest.TestCase):
         self.assertIsNone(settings.database_url)
         self.assertEqual(settings.celery_broker_url, "redis://localhost:6379/0")
         self.assertEqual(settings.celery_result_backend, "redis://localhost:6379/1")
+        self.assertIsNone(settings.deepseek_api_key)
+        self.assertEqual(settings.deepseek_model, "deepseek-chat")
+        self.assertEqual(settings.deepseek_base_url, "https://api.deepseek.com")
+        self.assertEqual(settings.deepseek_temperature, 0.0)
 
     def test_settings_are_loaded_from_environment_and_cached(self):
         environment = {
@@ -29,6 +33,10 @@ class SettingsTests(unittest.TestCase):
             "DATABASE_URL": "postgresql+psycopg://user:pass@localhost/test",
             "CELERY_BROKER_URL": "redis://redis:6379/2",
             "CELERY_RESULT_BACKEND": "redis://redis:6379/3",
+            "DEEPSEEK_API_KEY": "test-secret",
+            "DEEPSEEK_MODEL": "deepseek-reasoner",
+            "DEEPSEEK_BASE_URL": "https://deepseek.example.test",
+            "DEEPSEEK_TEMPERATURE": "0.2",
         }
         with patch.dict(os.environ, environment, clear=True):
             first = get_settings()
@@ -40,6 +48,10 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(first.database_url, environment["DATABASE_URL"])
         self.assertEqual(first.celery_broker_url, environment["CELERY_BROKER_URL"])
         self.assertEqual(first.celery_result_backend, environment["CELERY_RESULT_BACKEND"])
+        self.assertEqual(first.deepseek_api_key.get_secret_value(), "test-secret")
+        self.assertEqual(first.deepseek_model, "deepseek-reasoner")
+        self.assertEqual(first.deepseek_base_url, "https://deepseek.example.test")
+        self.assertEqual(first.deepseek_temperature, 0.2)
 
     def test_invalid_log_level_is_rejected(self):
         with self.assertRaisesRegex(ValidationError, "LOG_LEVEL must be"):
