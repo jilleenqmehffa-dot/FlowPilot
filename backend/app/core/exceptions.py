@@ -22,3 +22,11 @@ class OpportunityOwnerConflictError(CRMServiceError, ValueError):
 
 class InvalidActivityError(CRMServiceError, ValueError):
     """Activity data violates a business rule not expressible by one field."""
+
+
+class InvalidTaskError(CRMServiceError, ValueError):
+    """Task data violates a business rule not expressible by one field."""
+
+
+class InvalidTaskTransitionError(CRMServiceError, ValueError):
+    """The requested task status transition is not allowed."""
