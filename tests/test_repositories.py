@@ -226,6 +226,59 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual(parameters["param_1"], 25)
         self.assertEqual(parameters["param_2"], 5)
 
+    def test_company_detail_and_mutation_queries(self):
+        repository = CompanyRepository(self.session)
+        company = Company(id=10, name="Customer", owner_id=20)
+        self.session.scalar.return_value = company
+
+        self.assertIs(repository.get_for_update(10), company)
+        lock_statement = self.session.scalar.call_args.args[0]
+        self.assertIn("WHERE companies.id =", str(lock_statement))
+        self.assertIn("FOR UPDATE", str(lock_statement))
+
+        self.assertIs(repository.get_detail(10), company)
+        detail_statement = self.session.scalar.call_args.args[0]
+        self.assertEqual(len(detail_statement._with_options), 5)
+
+    def test_customer_list_filters_by_owner_and_sorts_by_name(self):
+        repository = CompanyRepository(self.session)
+        self.session.scalars.return_value.all.return_value = []
+
+        self.assertEqual(repository.list_customers(owner_id=20, limit=25), [])
+
+        statement = self.session.scalars.call_args.args[0]
+        sql = str(statement)
+        self.assertIn("companies.owner_id =", sql)
+        self.assertIn("ORDER BY companies.name, companies.id", sql)
+        self.assertEqual(statement.compile().params["param_1"], 25)
+
+    def test_contact_detail_mutation_and_company_list_queries(self):
+        repository = ContactRepository(self.session)
+        contact = Contact(id=30, company_id=10, name="Contact")
+        self.session.scalar.return_value = contact
+
+        self.assertIs(repository.get_for_update(30), contact)
+        lock_statement = self.session.scalar.call_args.args[0]
+        self.assertIn("WHERE contacts.id =", str(lock_statement))
+        self.assertIn("FOR UPDATE", str(lock_statement))
+
+        self.assertIs(repository.get_detail(30), contact)
+        detail_statement = self.session.scalar.call_args.args[0]
+        self.assertEqual(len(detail_statement._with_options), 1)
+
+        self.session.scalars.return_value.all.return_value = [contact]
+        self.assertEqual(
+            repository.list_by_company(10, offset=5, limit=25),
+            [contact],
+        )
+        list_statement = self.session.scalars.call_args.args[0]
+        sql = str(list_statement)
+        self.assertIn("contacts.company_id =", sql)
+        self.assertIn("ORDER BY contacts.name, contacts.id", sql)
+        parameters = list_statement.compile().params
+        self.assertEqual(parameters["param_1"], 25)
+        self.assertEqual(parameters["param_2"], 5)
+
 
 if __name__ == "__main__":
     unittest.main()
