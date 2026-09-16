@@ -53,6 +53,28 @@ npm run dev
 `GET /health` 是后端启动检查接口。LangGraph、LangChain 已列入依赖，使用模型时再配置对应提供商和 API key。
 后端配置统一定义在 `backend/app/core/config.py`，从环境变量或项目根目录 `.env` 加载，并由 API、数据库和 Celery 共用。日志配置位于 `backend/app/core/log.py`，通过 `LOG_LEVEL` 控制级别，默认输出到控制台。
 
+## CRM Deal Runtime
+
+配置 `DEEPSEEK_API_KEY` 后，可通过 `initialize_runtime` 创建固定顺序的 LangGraph：
+
+```text
+获取 CRM Context → DealAnalysis（LLM）→ NextAction（LLM）
+```
+
+```python
+from sqlalchemy.orm import Session
+
+from backend.app.agent import initialize_runtime
+
+with Session(engine) as session:
+    runtime = initialize_runtime(session)
+    result = runtime.run(opportunity_id=1)
+    print(result.deal_analysis)
+    print(result.next_action)
+```
+
+CRM Context 由数据库中的商机、客户、负责人、近期互动和未完成任务组成；两个模型步骤分别位于 `backend/app/agent/prompts/deal_analysis.py` 与 `backend/app/agent/prompts/next_action.py`，并使用 Pydantic 结构化输出。runtime 初始化本身不会请求模型，只有调用 `run` 才会产生两次 LLM 请求。
+
 ## 验证与停止
 
 ```bash
